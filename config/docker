@@ -1,0 +1,6 @@
+Name: Docker session
+Default: yes
+Priority: 0
+Session-Type: Additional
+Session:
+	required	pam_docker.so
