@@ -1,5 +1,6 @@
 /* vim: set sts=4 ts=4 sw=4: */
 
+#define _GNU_SOURCE
 #define PAM_SM_SESSION
 
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <sched.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -58,14 +60,16 @@ static int pid_and_id_of_docker_container(pam_handle_t* pamh, const char* docker
     }
 
     server.sun_family = AF_UNIX;
-    strncpy(server.sun_path, docker_sock, sizeof(server.sun_path));
+    strncpy(server.sun_path, docker_sock, sizeof(server.sun_path)/sizeof(*server.sun_path));
     rc = connect(sock, (struct sockaddr *) &server, sizeof(struct sockaddr_un));
     if(rc < 0) {
         pam_syslog(pamh, LOG_ERR, "failed to connect to docker socket %s", docker_sock);
         goto request_error;
     }
 
-    snprintf(message, sizeof(message), "GET /containers/%s/json HTTP/1.0\r\n\r\n", docker_container);
+    snprintf(message, sizeof(message)/sizeof(*message), "GET /containers/%s/json HTTP/1.0\r\n\r\n",
+        docker_container);
+
     rc = write(sock, message, strlen(message));
     if(rc < 0) {
         pam_syslog(pamh, LOG_ERR, "failed to send message to docker socket %s", docker_sock);
@@ -112,7 +116,7 @@ static int pid_and_id_of_docker_container(pam_handle_t* pamh, const char* docker
         }
 
         match = strstr(response, id_search);
-        snprintf(fmt, sizeof(fmt), "%%%ds", PAM_DOCKER_ID_SIZE);
+        snprintf(fmt, sizeof(fmt)/sizeof(*fmt), "%%%ds", PAM_DOCKER_ID_SIZE);
         if(!match || sscanf(match + strlen(id_search), fmt, docker_id) != 1) {
             pam_syslog(pamh, LOG_ERR, "failed to parse Id from answer");
             goto response_error;
@@ -146,13 +150,14 @@ static int add_to_cgroup(pam_handle_t* pamh, pid_t pid, const char* cgroup) {
         goto error;
     }
 
-    snprintf(pid_str, sizeof(pid_str), "%d", pid);
+    snprintf(pid_str, sizeof(pid_str)/sizeof(*pid_str), "%d", pid);
 
     while(readdir_r(dir, &entry, &result) == 0 && result != NULL) {
         if(entry.d_type != DT_DIR) continue;
         if(strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0) continue;
 
-        snprintf(path, sizeof(path), "%s/%s/docker/%s/tasks", cgroup_root_path, entry.d_name, cgroup);
+        snprintf(path, sizeof(path)/sizeof(*path), "%s/%s/docker/%s/tasks",
+            cgroup_root_path, entry.d_name, cgroup);
 
         if(access(path, F_OK) == 0) {
             fd = open(path, O_WRONLY | O_APPEND);
@@ -176,6 +181,45 @@ cgroup_write_error:
 error:
     return 1;
 }
+
+static int add_to_namespaces(pam_handle_t* pamh, pid_t namespace_target_pid) {
+    int ret = 0;
+    char pathbuf[PATH_MAX];
+    char* ns[] = {"ipc", "uts", "pid", "mnt"};
+    size_t n = sizeof(ns)/sizeof(*ns);
+    int ns_fd[n];
+    size_t i;
+
+    for(i = 0; i < n; i++) ns_fd[i] = -1;
+
+    for(i = 0; i < n; i++) {
+        snprintf(pathbuf, sizeof(pathbuf)/sizeof(*pathbuf), "/proc/%d/ns/%s", namespace_target_pid, ns[i]);
+        ns_fd[i] = open(pathbuf, O_RDONLY);
+        if(ns_fd[i] < 0) {
+            pam_syslog(pamh, LOG_ERR, "failed to open '%s' namespace fd", ns[i]);
+            goto error;
+        }
+    }
+
+    for(i = 0; i < n; i++) {
+        if(setns(ns_fd[i], 0)) {
+            pam_syslog(pamh, LOG_ERR, "failed to open '%s' namespace fd", ns[i]);
+            goto error;
+        }
+    }
+
+out:
+    for(i = 0; i < n; i++)
+        if(ns_fd[i] > 0)
+            close(ns_fd[i]);
+
+    return ret;
+
+error:
+    ret = 1;
+    goto out;
+}
+
 
 PAM_EXTERN int pam_sm_open_session(pam_handle_t* pamh, int flags, int argc, const char** argv) {
     (void)pamh;
@@ -210,6 +254,13 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t* pamh, int flags, int argc, cons
     rc = add_to_cgroup(pamh, getpid(), docker_id);
     if(rc != 0) {
         pam_syslog(pamh, LOG_ERR, "cannot add session to cgroup '%s'", docker_id);
+        goto error;
+    }
+
+    rc = add_to_namespaces(pamh, docker_pid);
+    if(rc != 0) {
+        pam_syslog(pamh, LOG_ERR, "cannot add session to namespaces for docker pid '%ld'",
+            (long)docker_pid);
         goto error;
     }
 
