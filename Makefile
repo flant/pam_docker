@@ -19,7 +19,7 @@ install: $(CURDIR)/pam_docker.so
 	install -d $(DESTDIR)/lib/security
 	install -d $(DESTDIR)/usr/share/pam-configs/
 	install -o root -g root -m 644 $(CURDIR)/pam_docker.so $(DESTDIR)/lib/security
-	install -o root -g root $(CURDIR)/docker $(DESTDIR)/usr/share/pam-configs/
+	install -o root -g root $(CURDIR)/config/docker $(DESTDIR)/usr/share/pam-configs/
 
 uninstall:
 	rm $(DESTDIR)/lib/security/pam_docker.so
