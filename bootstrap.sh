@@ -21,7 +21,7 @@ docker exec container1 /bin/bash -c "groupadd myusers1 -g $(getent group myusers
 docker exec container2 /bin/bash -c "groupadd myusers1 -g $(getent group myusers1 | cut -d':' -f3)"
 
 groupadd myusers2
-docker exec container3 /bin/bash -c "groupadd myusers2 -g $(getent group myusers1 | cut -d':' -f3)"
+docker exec container3 /bin/bash -c "groupadd myusers2 -g $(getent group myusers2 | cut -d':' -f3)"
 
 useradd myuser1 -g myusers1
 docker exec container1 /bin/bash -c "useradd -m myuser1 -u $(getent passwd myuser1 | cut -d':' -f3) -g myusers1"
