@@ -1,4 +1,4 @@
-/* vim: set sts=4 ts=4 sw=4: */
+/* vi: set sts=4 ts=4 sw=4 : */
 
 #define _GNU_SOURCE
 #define PAM_SM_SESSION
