@@ -93,27 +93,27 @@ static int docker_container_of_user(pam_handle_t *pamh, const char *username,
 
         check_domain = strtok_r(line_p, delim, &saveptr);
         if(check_domain == NULL) {
-            pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: no domain specified",
+            pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: no domain specified",
                 security_conf_path, line_num);
-            goto security_conf_error;
+            continue;
         }
 
         container = strtok_r(NULL, delim, &saveptr);
         if(container == NULL) {
-            pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: no container specified",
+            pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: no container specified",
                 security_conf_path, line_num);
-            goto security_conf_error;
+            continue;
         } else if(strlen(container) >= result_container_size) {
-            pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: too long container name '%s'",
-                security_conf_path, line_num, container);
-            goto security_conf_error;
+            pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: "
+                "too long container name '%s'", security_conf_path, line_num, container);
+            continue;
         }
 
         token = strtok_r(NULL, delim, &saveptr);
         if(token != NULL) {
-            pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: unexpected token '%s'",
+            pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: unexpected token '%s'",
                 security_conf_path, line_num, token);
-            goto security_conf_error;
+            continue;
         }
 
         if(check_domain[0] == '@') {
@@ -122,9 +122,9 @@ static int docker_container_of_user(pam_handle_t *pamh, const char *username,
 
             check_group_entry = getgrnam(check_group);
             if(!check_group_entry) {
-                pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: unknown group '%s'",
+                pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: unknown group '%s'",
                     security_conf_path, line_num, check_group);
-                goto security_conf_error;
+                continue;
             }
 
             for(i = 0; i < ngroups; i++) {
@@ -140,9 +140,9 @@ static int docker_container_of_user(pam_handle_t *pamh, const char *username,
 
             check_passwd_entry = getpwnam(check_username);
             if(!check_passwd_entry) {
-                pam_syslog(pamh, LOG_ERR, "docker security config error: %s:%zu: unknown user '%s'",
+                pam_syslog(pamh, LOG_WARNING, "docker security config error: %s:%zu: unknown user '%s'",
                     security_conf_path, line_num, check_username);
-                goto security_conf_error;
+                continue;
             }
 
             if(check_passwd_entry->pw_uid == uid) {
@@ -157,9 +157,6 @@ out:
     free(line);
     fclose(file);
     return ret;
-security_conf_error:
-    free(line);
-    fclose(file);
 error:
     return 1;
 }
@@ -358,8 +355,8 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, cons
 
     rc = docker_container_of_user(pamh, username, docker_container, sizeof(docker_container));
     if(rc != 0) {
-        pam_syslog(pamh, LOG_ERR, "cannot determine docker container of user '%s'", username);
-        goto error;
+        pam_syslog(pamh, LOG_DEBUG, "cannot determine docker container of user '%s'", username);
+        goto out;
     }
 
     rc = pid_and_id_of_docker_container(pamh, docker_container, &docker_pid, docker_id);
@@ -386,6 +383,7 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, cons
         username, docker_container, (long)docker_pid, docker_id
     );
 
+out:
     return PAM_SUCCESS;
 error:
     return PAM_SESSION_ERR;
