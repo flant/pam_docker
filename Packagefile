@@ -1,0 +1,28 @@
+os:
+  ubuntu:
+    run:
+      - apt-get install -y git build-essential libpam0g-dev
+      - git clone https://github.com/flant/pam_docker.git /root/pam_docker
+
+targets:
+  ubuntu-14.04-pam_docker:
+    run:
+      - cd /root/pam_docker
+      - make
+      - echo -e '#!/bin/bash\npam-auth-update --package' > after_install.sh
+      - cp after_install.sh after_upgrade.sh
+      - echo -e '#!/bin/bash\nrm /usr/share/pam-configs/docker\npam-auth-update --package' > after_remove.sh
+      - chmod +x pam_auth_update.sh
+      - chmod 644 pam_docker.so
+      - fpm -s dir -t deb -n pam_docker \
+          --deb-use-file-permissions \
+          --version 0.0.1-1 \
+          --after-install pam_auth_update.sh \
+          --after-upgrade pam_auth_update.sh \
+          --after-remove pam_config_remove.sh \
+          --after-remove pam_auth_update.sh \
+          --config-files /etc/security/docker.conf \
+          --config-files /usr/share/pam-configs/docker \
+          pam_docker.so=/lib/security/pam_docker.so \
+          config/security.conf=/etc/security/docker.conf \
+          config/docker=/usr/share/pam-configs/docker
