@@ -1,28 +1,44 @@
+build_type: fpm
+package_name: pam_docker
+
+# package_version: $CI_BUILD_TAG || $TRAVIS_TAG || упасть
+
+build_deps: git build-essential
+
+before_prepare:
+    - curl http://flant.ru/key.gpg | apt-key -
+
+after_prepare:
+    - curl http://flant.ru/key.gpg | apt-key -
+
+fpm_script:
+  - when: after_remove
+    what:
+      - rm /usr/share/pam-configs/docker
+  - when: after_install, after_upgrade, after_remove
+    what:
+      - pam-auth-update --package # <cmd>
+
+fpm_config_files:
+    config/security.conf: /etc/security/docker.conf
+
+fpm_files:
+    config/docker: /usr/share/pam-configs/docker
+    pam_docker.so: /lib/security/pam_docker.so \
+
 os:
-  ubuntu:
-    run:
-      - apt-get install -y git build-essential libpam0g-dev
-      - git clone https://github.com/flant/pam_docker.git /root/pam_docker
+    ubuntu:
+         build_deps: libpam0g-dev
+    centos:
+         build_deps: libpam0g-devel
+
+#after_patch:
+#    - rm debian/patches/lalala.patch
+
+before_build:
+    - make
+    - mkdir -p $(pwd)/build
+    - PREFIX=$(pwd)/build make install
 
 targets:
-  ubuntu-14.04-pam_docker:
-    run:
-      - cd /root/pam_docker
-      - make
-      - echo -e '#!/bin/bash\npam-auth-update --package' > after_install.sh
-      - cp after_install.sh after_upgrade.sh
-      - echo -e '#!/bin/bash\nrm /usr/share/pam-configs/docker\npam-auth-update --package' > after_remove.sh
-      - chmod +x pam_auth_update.sh
-      - chmod 644 pam_docker.so
-      - fpm -s dir -t deb -n pam_docker \
-          --deb-use-file-permissions \
-          --version 0.0.1-1 \
-          --after-install pam_auth_update.sh \
-          --after-upgrade pam_auth_update.sh \
-          --after-remove pam_config_remove.sh \
-          --after-remove pam_auth_update.sh \
-          --config-files /etc/security/docker.conf \
-          --config-files /usr/share/pam-configs/docker \
-          pam_docker.so=/lib/security/pam_docker.so \
-          config/security.conf=/etc/security/docker.conf \
-          config/docker=/usr/share/pam-configs/docker
+  ubuntu-14.04-pam_docker: true
