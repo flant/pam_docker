@@ -1,0 +1,12 @@
+sudo: required
+dist: trusty
+cache: apt
+install:
+  - git clone https://github.com/flant/thepackager.git /opt/thepackager
+  - cd /thepackager
+  - gem install bundler
+  - bundle install
+before-script:
+  - BUNDLE_GEMFILE=/opt/thepackager/Gemfile thepackager prepare
+script:
+  - BUNDLE_GEMFILE=/opt/thepackager/Gemfile thepackager build
