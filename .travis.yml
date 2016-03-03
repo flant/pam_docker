@@ -1,13 +1,7 @@
-sudo: required
 dist: trusty
 cache: apt
-install:
-  - cd ~
-  - git clone https://github.com/flant/thepackager.git
-  - cd thepackager
-  - gem install bundler
-  - bundle install
-before-script:
-  - BUNDLE_GEMFILE=~/thepackager/Gemfile thepackager prepare
-script:
-  - BUNDLE_GEMFILE=~/thepackager/Gemfile thepackager build
+language: ruby
+rvm: 2.2.1
+before_install: gem install thepackager
+before-script: thepackager prepare
+script: thepackager build
