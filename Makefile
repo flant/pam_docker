@@ -15,16 +15,14 @@ $(CURDIR)/stamp:
 clean:
 	@rm -rf $(CURDIR)/stamp $(CURDIR)/pam_docker.o $(CURDIR)/pam_docker.so
 
-install-ubuntu-14.04: $(CURDIR)/pam_docker.so
+install: $(CURDIR)/pam_docker.so
 	install -d $(DESTDIR)/lib/security
 	install -d $(DESTDIR)/usr/share/pam-configs/
 	install -o root -g root -m 644 $(CURDIR)/pam_docker.so $(DESTDIR)/lib/security
 	install -o root -g root $(CURDIR)/config/docker $(DESTDIR)/usr/share/pam-configs/
-	pam-auth-update --package
 
-uninstall-ubuntu-14.04:
+uninstall:
 	rm $(DESTDIR)/lib/security/pam_docker.so
 	rm $(DESTDIR)/usr/share/pam-configs/docker
-	pam-auth-update --package
 
-.PHONY: all clean install-ubuntu-14.04 uninstall-ubuntu-14.04
+.PHONY: all clean install uninstall

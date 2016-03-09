@@ -1,44 +1,58 @@
 build_type: fpm
-package_name: pam_docker
 
+# fpm build type:
+# - fixed package_name
+# - fixed package_version (git tag)
+
+package_name: pam_docker
 # package_version: $CI_BUILD_TAG || $TRAVIS_TAG || упасть
 
-build_deps: git build-essential
+build_dep: []
 
 before_prepare:
-    - curl http://flant.ru/key.gpg | apt-key -
+- 'echo "$(date): before_prepare" >> ~/prepare.log'
 
 after_prepare:
-    - curl http://flant.ru/key.gpg | apt-key -
+- 'echo "$(date): after_prepare" >> ~/prepare.log'
 
 fpm_script:
-  - when: after_remove
-    what:
-      - rm /usr/share/pam-configs/docker
-  - when: after_install, after_upgrade, after_remove
-    what:
-      - pam-auth-update --package # <cmd>
+- on: after_remove
+  do: rm /usr/share/pam-configs/docker
+- on: after_install, after_upgrade, after_remove
+  do:
+    - pam-auth-update --package
 
 fpm_config_files:
-    config/security.conf: /etc/security/docker.conf
+  config/security.conf: /etc/security/docker.conf
 
 fpm_files:
-    config/docker: /usr/share/pam-configs/docker
-    pam_docker.so: /lib/security/pam_docker.so \
+  config/docker: /usr/share/pam-configs/docker
+  pam_docker.so: /lib/security/pam_docker.so
 
 os:
-    ubuntu:
-         build_deps: libpam0g-dev
-    centos:
-         build_deps: libpam0g-devel
+  ubuntu:
+    prepare:
+    - apt-get install -y build-essential libpam0g-dev
+    build_dep: libpam0g
+  ubuntu-12.04:
+    prepare:
+    - apt-get install -y tree
+  centos:
+    build_dep: pam
+    prepare:
+    - yum groupinstall -y 'Development Tools'
+    - yum install -y pam-devel
 
 #after_patch:
-#    - rm debian/patches/lalala.patch
+#- rm debian/patches/lalala.patch
 
 before_build:
-    - make
-    - mkdir -p $(pwd)/build
-    - PREFIX=$(pwd)/build make install
+- make
+- mkdir -p $(pwd)/build
+- DESTDIR=$(pwd)/build make install
 
-targets:
-  ubuntu-14.04-pam_docker: true
+target:
+- ubuntu
+- ubuntu-12.04
+- centos-centos6
+- centos
