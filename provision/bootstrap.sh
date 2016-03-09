@@ -7,10 +7,13 @@ echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' > /etc/apt/sour
 apt-get update
 apt-get install -y docker-engine
 
+gpasswd -a vagrant docker
+service docker restart
+
 cd /vagrant
 make clean
 make
-make install-ubuntu-14.04
+make install-ubuntu
 
 docker run -d --name=container1 ubuntu:14.04 /bin/bash -c 'while true; do date; sleep 1; done'
 docker run -d --name=container2 ubuntu:14.04 /bin/bash -c 'while true; do date; sleep 1; done'
