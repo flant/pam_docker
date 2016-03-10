@@ -11,8 +11,7 @@ install:
 - sudo apt-get update
 - sudo apt-get -o dpkg::options::="--force-confnew" install -y docker-engine
 - git clone https://github.com/flant/thepackager ~/thepackager
-- echo "export BUNDLE_GEMFILE=/~/thepackager/Gemfile" >> ~/.bashrc
-- chmod +x /etc/profile.d/thepackager.sh
+- echo "export BUNDLE_GEMFILE=/~/thepackager/Gemfile" | tee -a ~/.bashrc
 - cd ~/thepackager
 - gem install bundler
 - bundle install
