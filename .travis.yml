@@ -15,7 +15,10 @@ install:
 - export BUNDLE_GEMFILE=~/thepackager/Gemfile
 - gem install bundler
 - bundle install
-script: thepackager build
+script:
+- thepackager build
 sudo: required
-before_script: thepackager prepare
-deploy: thepackager deploy
+before_script:
+- thepackager prepare
+deploy:
+- thepackager deploy
