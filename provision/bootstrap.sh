@@ -42,3 +42,5 @@ echo '@myusers2 container3' >> /etc/security/docker.conf
 echo '* * * * * echo "$(date) Get me outta here! I am $(id)" >> ~/HELP' | crontab -u myuser1 -
 echo '* * * * * echo "$(date) Get me outta here! I am $(id)" >> ~/HELP' | crontab -u myuser2 -
 echo '* * * * * echo "$(date) Get me outta here! I am $(id)" >> ~/HELP' | crontab -u myuser3 -
+
+sed -i -r 's/# *(\".*history-search)/\1/' /etc/inputrc

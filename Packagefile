@@ -1,5 +1,7 @@
 build_type: fpm
 
+# image: thepackager/test
+
 # fpm build type:
 # - fixed package_name
 # - fixed package_version (git tag)
