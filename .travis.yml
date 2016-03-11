@@ -1,8 +1,6 @@
 ---
 dist: trusty
-cache:
-- apt
-- bundler
+cache: apt
 language: ruby
 rvm: 2.2.1
 install:
