@@ -56,5 +56,5 @@ before_build:
 target:
 - ubuntu
 - ubuntu-12.04
-- centos-centos6
 - centos
+#- centos-centos6
