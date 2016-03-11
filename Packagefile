@@ -57,4 +57,4 @@ target:
 - ubuntu
 - ubuntu-12.04
 - centos
-#- centos-centos6
+- centos-centos6
