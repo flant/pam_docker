@@ -10,11 +10,7 @@ install:
 - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
 - sudo apt-get update
 - sudo apt-get -o dpkg::options::="--force-confnew" install -y docker-engine
-- git clone https://github.com/flant/thepackager ~/thepackager
-- echo "export BUNDLE_GEMFILE=~/thepackager/Gemfile" | tee -a ~/.bashrc
-- export BUNDLE_GEMFILE=~/thepackager/Gemfile
-- gem install bundler
-- bundle install
+- gem install thepackager
 script: thepackager build
 sudo: required
 before_script: thepackager prepare
