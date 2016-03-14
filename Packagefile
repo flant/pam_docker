@@ -1,6 +1,6 @@
 build_type: fpm
 
-#  image: thepackager/test
+# image: thepackager/test
 
 # fpm build type:
 # - fixed package_name
