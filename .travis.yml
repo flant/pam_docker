@@ -22,6 +22,8 @@ before_script: thepackager prepare
 deploy:
   provider: script
   script: thepackager deploy
+  'on':
+    tags: true
 env:
 - THEPACKAGER_TARGET=ubuntu
 - THEPACKAGER_TARGET=ubuntu-12.04
