@@ -1,27 +1,11 @@
 build_type: fpm
-
-# image: thepackager/test
-
-# fpm build type:
-# - fixed package_name
-# - fixed package_version (git tag)
-
 package_name: pam_docker
-# package_version: $CI_BUILD_TAG || $TRAVIS_TAG || упасть
-
-build_dep: []
-
-before_prepare:
-- 'echo "$(date): before_prepare" >> ~/prepare.log'
-
-after_prepare:
-- 'echo "$(date): after_prepare" >> ~/prepare.log'
 
 fpm_script:
 - when: before_install
-  do: echo "BEFORE PACKAGE INSTALL"
+  do: echo "COMMON BEFORE PACKAGE INSTALL"
 - when: after_install
-  do: echo "AFTER PACKAGE INSTALL"
+  do: echo "COMMON AFTER PACKAGE INSTALL"
 
 os:
   ubuntu:
@@ -34,7 +18,7 @@ os:
       build/lib/security/pam_docker.so: /lib/security/pam_docker.so
     fpm_script:
     - when: before_remove
-      do: echo "BEFORE REMOVE"
+      do: echo "UBUNTU BEFORE REMOVE"
     - when: [after_install, after_upgrade, after_remove]
       do:
       - echo "updating pam auth ..."
@@ -45,10 +29,7 @@ os:
     - yum install -y pam-devel
     fpm_script:
     - on: after_remove
-      do: echo 'AFTER REMOVE'
-
-#after_patch:
-#- rm debian/patches/lalala.patch
+      do: echo 'CENTOS AFTER REMOVE'
 
 before_build:
 - make clean
