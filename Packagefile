@@ -25,6 +25,8 @@ os:
       - pam-auth-update --package
       - echo "updating pam auth DONE"
   centos:
+    fpm_config_files:
+      build/etc/security/docker.conf: /etc/security/docker.conf
     prepare:
     - yum install -y pam-devel
     fpm_script:
@@ -40,4 +42,3 @@ target:
 - ubuntu
 - ubuntu-12.04
 - centos
-- centos-centos6
