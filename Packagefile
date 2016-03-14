@@ -18,40 +18,42 @@ after_prepare:
 - 'echo "$(date): after_prepare" >> ~/prepare.log'
 
 fpm_script:
-- on: after_remove
-  do: rm /usr/share/pam-configs/docker
-- on: after_install, after_upgrade, after_remove
-  do:
-    - pam-auth-update --package
-
-fpm_config_files:
-  config/security.conf: /etc/security/docker.conf
-
-fpm_files:
-  config/docker: /usr/share/pam-configs/docker
-  pam_docker.so: /lib/security/pam_docker.so
+- when: before_install
+  do: echo "BEFORE PACKAGE INSTALL"
+- when: after_install
+  do: echo "AFTER PACKAGE INSTALL"
 
 os:
   ubuntu:
     prepare:
-    - apt-get install -y build-essential libpam0g-dev
-    build_dep: libpam0g
-  ubuntu-12.04:
-    prepare:
-    - apt-get install -y tree
+    - apt-get install -y libpam0g-dev
+    fpm_config_files:
+      build/etc/security/docker.conf: /etc/security/docker.conf
+    fpm_files:
+      build/usr/share/pam-configs/docker: /usr/share/pam-configs/docker
+      build/lib/security/pam_docker.so: /lib/security/pam_docker.so
+    fpm_script:
+    - when: before_remove
+      do: echo "BEFORE REMOVE"
+    - when: [after_install, after_upgrade, after_remove]
+      do:
+      - echo "updating pam auth ..."
+      - pam-auth-update --package
+      - echo "updating pam auth DONE"
   centos:
-    build_dep: pam
     prepare:
-    - yum groupinstall -y 'Development Tools'
     - yum install -y pam-devel
+    fpm_script:
+    - on: after_remove
+      do: echo 'AFTER REMOVE'
 
 #after_patch:
 #- rm debian/patches/lalala.patch
 
 before_build:
+- make clean
 - make
-- mkdir -p $(pwd)/build
-- DESTDIR=$(pwd)/build make install
+- DESTDIR=./build make install
 
 target:
 - ubuntu
