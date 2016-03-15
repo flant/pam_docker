@@ -1,5 +1,6 @@
 build_type: fpm
 package_name: pam_docker
+package_cloud: flant/pam_docker
 
 os:
   ubuntu:
