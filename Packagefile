@@ -27,6 +27,9 @@ os:
   centos:
     fpm_config_files:
       build/etc/security/docker.conf: /etc/security/docker.conf
+      build/usr/share/pam-configs/docker: /etc/pam.d/docker
+    fpm_files:
+      build/lib/security/pam_docker.so: /lib64/security/pam_docker.so
     prepare:
     - yum install -y pam-devel
     fpm_script:
