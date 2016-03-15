@@ -1,12 +1,6 @@
 build_type: fpm
 package_name: pam_docker
 
-fpm_script:
-- when: before_install
-  do: echo "COMMON BEFORE PACKAGE INSTALL"
-- when: after_install
-  do: echo "COMMON AFTER PACKAGE INSTALL"
-
 os:
   ubuntu:
     prepare:
@@ -17,8 +11,6 @@ os:
       build/usr/share/pam-configs/docker: /usr/share/pam-configs/docker
       build/lib/security/pam_docker.so: /lib/security/pam_docker.so
     fpm_script:
-    - when: before_remove
-      do: echo "UBUNTU BEFORE REMOVE"
     - when: [after_install, after_upgrade, after_remove]
       do:
       - echo "updating pam auth ..."
@@ -32,9 +24,6 @@ os:
       build/lib/security/pam_docker.so: /lib64/security/pam_docker.so
     prepare:
     - yum install -y pam-devel
-    fpm_script:
-    - on: after_remove
-      do: echo 'CENTOS AFTER REMOVE'
 
 before_build:
 - make clean
