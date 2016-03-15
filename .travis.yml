@@ -22,7 +22,7 @@ before_script: thepackager prepare
 deploy:
   skip_cleanup: true
   provider: script
-  script: "bash -lec \"echo HELLO; echo env ; echo 'thepackager: $(which thepackager)\""
+  script: 'bash -lec "echo --ENV; env ; echo --THEPACKAGER_PATH ; which thepackager ; echo --END"'
   'on':
     tags: true
 env:
