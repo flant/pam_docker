@@ -44,3 +44,4 @@ echo '* * * * * echo "$(date) Get me outta here! I am $(id)" >> ~/HELP' | cronta
 echo '* * * * * echo "$(date) Get me outta here! I am $(id)" >> ~/HELP' | crontab -u myuser3 -
 
 sed -i -r 's/# *(\".*history-search)/\1/' /etc/inputrc
+sed -i -e 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/vagrant/.bashrc

@@ -11,6 +11,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   branch = %x{git rev-parse --abbrev-ref HEAD}.strip
   if branch == 'packagefile'
-    config.vm.provision :shell, path: "provision/thepackager.sh"
+    config.vm.provision :shell, path: "provision/buildizer.sh"
   end
 end

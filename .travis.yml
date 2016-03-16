@@ -11,16 +11,16 @@ install:
 - sudo apt-get update
 - sudo apt-get -o dpkg::options::="--force-confnew" install -y docker-engine=1.9.1-0~trusty
 - echo "docker-engine hold" | sudo dpkg --set-selections
-- git clone https://github.com/flant/thepackager ~/thepackager
-- echo "export BUNDLE_GEMFILE=~/thepackager/Gemfile" | tee -a ~/.bashrc
-- export BUNDLE_GEMFILE=~/thepackager/Gemfile
+- git clone https://github.com/flant/buildizer ~/buildizer
+- echo "export BUNDLE_GEMFILE=~/buildizer/Gemfile" | tee -a ~/.bashrc
+- export BUNDLE_GEMFILE=~/buildizer/Gemfile
 - gem install bundler
 - bundle install
-script: thepackager build
+script: buildizer build
 sudo: required
-before_script: thepackager prepare
+before_script: buildizer prepare
 env:
-- THEPACKAGER_TARGET=ubuntu
-- THEPACKAGER_TARGET=ubuntu-12.04
-- THEPACKAGER_TARGET=centos
-after_success: thepackager deploy
+- BUILDIZER_TARGET=ubuntu
+- BUILDIZER_TARGET=ubuntu-12.04
+- BUILDIZER_TARGET=centos
+after_success: buildizer deploy

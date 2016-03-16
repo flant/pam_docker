@@ -4,5 +4,5 @@
 /stamp
 /.vagrant
 .tags
-/thepackager
+/buildizer
 /build
