@@ -20,7 +20,7 @@ script: buildizer build
 sudo: required
 before_script: buildizer prepare
 env:
-- BUILDIZER_TARGET=ubuntu-14.04
-- BUILDIZER_TARGET=ubuntu-12.04
-- BUILDIZER_TARGET=centos-centos7
+- BUILDIZER_TARGET=ubuntu/14.04
+- BUILDIZER_TARGET=ubuntu/12.04
+- BUILDIZER_TARGET=centos/centos7
 after_success: buildizer deploy

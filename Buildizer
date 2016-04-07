@@ -32,6 +32,6 @@ centos:
   - yum install -y pam-devel
 
 target:
-- ubuntu-14.04
-- ubuntu-12.04
-- centos-centos7
+- ubuntu/14.04
+- ubuntu/12.04
+- centos/centos7
