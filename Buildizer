@@ -1,6 +1,5 @@
 build_type: fpm
 package_name: pam_docker
-package_cloud: flant/pam_docker
 package_version: 0.0.1-22
 
 fpm_config_files:
