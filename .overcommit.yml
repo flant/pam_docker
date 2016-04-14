@@ -3,4 +3,8 @@ PreCommit:
   BuildizerVerify:
     enabled: true
     required: true
-    desc: verify Buildizer conf file
+    desc: Verify Buildizer conf file
+  BuildizerCiVerify:
+    enabled: true
+    required: true
+    desc: Verify travis configuration is up to date
