@@ -15,6 +15,7 @@ install:
 - echo "export BUNDLE_GEMFILE=~/buildizer/Gemfile" | tee -a ~/.bashrc
 - export BUNDLE_GEMFILE=~/buildizer/Gemfile
 - gem install bundler
+- gem install overcommit
 - bundle install
 script: buildizer build
 sudo: required

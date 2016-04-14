@@ -1,0 +1,6 @@
+---
+PreCommit:
+  BuildizerVerify:
+    enabled: true
+    required: true
+    desc: verify Buildizer conf file
