@@ -1,3 +1,2 @@
 ---
-latest: true
-ci: travis
+master: true
