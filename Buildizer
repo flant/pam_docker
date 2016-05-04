@@ -1,34 +1,28 @@
----
 build_type: fpm
+
 package_name: pam_docker
-package_version: 0.0.1-23
-fpm_config_files:
-  "/etc/security/docker.conf": build/etc/security/docker.conf
+package_version: 0.1.0-1
+
 before_build:
 - make
 - DESTDIR=build make install
+
 ubuntu:
   prepare:
   - apt-get install -y libpam0g-dev
   fpm_files:
-    "/usr/share/pam-configs/docker": build/usr/share/pam-configs/docker
-    "/lib/security/pam_docker.so": build/lib/security/pam_docker.so
+    /usr/share/pam-configs/docker: config/pam_auth_update.conf
+    /lib/security/pam_docker.so: build/pam_docker.so
   fpm_script:
-  - when:
-    - after_install
-    - after_upgrade
-    - after_remove
-    do:
-    - echo "updating pam auth ..."
-    - pam-auth-update --package
-    - echo "updating pam auth DONE"
+  - when: [after_install, after_upgrade, after_remove]
+    do: echo "updating pam auth ..." && pam-auth-update --package && echo "updating pam auth OK"
+
 centos:
-  fpm_config_files:
-    "/etc/pam.d/docker": build/usr/share/pam-configs/docker
-  fpm_files:
-    "/lib64/security/pam_docker.so": build/lib/security/pam_docker.so
   prepare:
   - yum install -y pam-devel
+  fpm_files:
+    /lib64/security/pam_docker.so: build/pam_docker.so
+
 target:
 - ubuntu/14.04
 - ubuntu/12.04
