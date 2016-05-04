@@ -7,6 +7,12 @@ before_build:
 - make
 - DESTDIR=build make install
 
+test_env:
+  DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
+
+test_options:
+  privileged: true
+
 ubuntu:
   prepare:
   - apt-get install -y libpam0g-dev
@@ -16,6 +22,17 @@ ubuntu:
   fpm_script:
   - when: [after_install, after_upgrade, after_remove]
     do: echo "updating pam auth ..." && pam-auth-update --package && echo "updating pam auth OK"
+
+  before_test:
+  - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >
+      /etc/apt/sources.list.d/docker.list
+  - apt-get install -y apt-transport-https ca-certificates
+  - apt-key adv
+      --keyserver hkp://p80.pool.sks-keyservers.net:80
+      --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  - apt-get update -q
+  - apt-get install -y docker-engine=$DOCKER_VERSION
+  - docker daemon &
 
 centos:
   prepare:
