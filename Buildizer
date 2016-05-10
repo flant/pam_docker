@@ -7,12 +7,6 @@ before_build:
 - make
 - DESTDIR=build make install
 
-test_env:
-  DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
-
-test_options:
-  privileged: true
-
 ubuntu:
   prepare:
   - apt-get install -y libpam0g-dev
@@ -26,19 +20,43 @@ ubuntu:
   before_test:
   - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >
       /etc/apt/sources.list.d/docker.list
-  - apt-get install -y apt-transport-https ca-certificates
-  - apt-key adv
-      --keyserver hkp://p80.pool.sks-keyservers.net:80
-      --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-  - apt-get update -q
+  - apt-get install -y apt-transport-https ca-certificates lxc iptables
+  - apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80
+                --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  - apt-get update
   - apt-get install -y docker-engine=$DOCKER_VERSION
-  - docker daemon &
+  - dmsetup mknodes
+  - CGROUP=/sys/fs/cgroup SECURITYFS=/sys/kernel/security &&
+    (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
+    (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS) &&
+    (for i in {0..200}; do mknod -m0660 /dev/loop$i b 7 $i || true; done)
+  - rm -rf /var/lib/docker/*
+  - (docker daemon &) && (while ! [ -f /var/run/docker.pid ]; do sleep 1 ; done)
+
+  # run test containers
+  - docker run -d --restart=always --name=zabor $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
+  - docker run -d --restart=always --name=turnichok $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
+  - docker run -d --restart=always --name=baran $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
+
+  # add test group zubilo
+  - groupadd zubilo
+  - docker exec zabor /bin/bash -c "groupadd zubilo -g $(getent group zubilo | cut -d":" -f3)"
+  - docker exec turnichok /bin/bash -c "groupadd zubilo -g $(getent group zubilo | cut -d":" -f3)"
 
 centos:
   prepare:
   - yum install -y pam-devel
   fpm_files:
     /lib64/security/pam_docker.so: build/pam_docker.so
+
+test_env:
+  DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
+  DOCKER_TEST_IMAGE: ubuntu:14.04
+
+test_options:
+  docker:
+    privileged: true
+    volume: "/tmp/test_docker:/var/lib/docker"
 
 target:
 - ubuntu/14.04
