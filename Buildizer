@@ -18,6 +18,7 @@ ubuntu:
     do: echo "updating pam auth ..." && pam-auth-update --package && echo "updating pam auth OK"
 
   before_test:
+  - git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
   - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >
       /etc/apt/sources.list.d/docker.list
   - apt-get install -y apt-transport-https ca-certificates lxc iptables
@@ -43,11 +44,29 @@ ubuntu:
   - docker exec zabor /bin/bash -c "groupadd zubilo -g $(getent group zubilo | cut -d":" -f3)"
   - docker exec turnichok /bin/bash -c "groupadd zubilo -g $(getent group zubilo | cut -d":" -f3)"
 
+  - kill $(cat /var/run/docker.pid) && COUNTER=0 &&
+      (while [ -f /var/run/docker.pid ]; do
+        if [ $COUNTER -ge 20 ] ; then
+          kill -9 $(cat /var/run/docker.pid) ;
+          rm /var/run/docker.pid ;
+          break ;
+        fi ;
+        sleep 1 ;
+        let COUNTER=COUNTER+1 ;
+      done)
+
 centos:
   prepare:
   - yum install -y pam-devel
   fpm_files:
     /lib64/security/pam_docker.so: build/pam_docker.so
+
+test:
+- echo "TEST BEGIN"
+- (docker daemon &) && (while ! [ -f /var/run/docker.pid ]; do sleep 1 ; done)
+- docker ps
+- bats test/
+- echo "TEST END"
 
 test_env:
   DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
