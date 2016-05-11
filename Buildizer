@@ -15,13 +15,13 @@ ubuntu:
     /lib/security/pam_docker.so: build/pam_docker.so
   fpm_script:
   - when: [after_install, after_upgrade, after_remove]
-    do: echo "updating pam auth ..." && pam-auth-update --package && echo "updating pam auth OK"
+    do: echo "Updating pam auth ..." && pam-auth-update --package && echo "Updating pam auth OK"
 
   before_test:
   - git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
   - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >
       /etc/apt/sources.list.d/docker.list
-  - apt-get install -y apt-transport-https ca-certificates lxc iptables
+  - apt-get install -y apt-transport-https ca-certificates lxc iptables ssh sshpass
   - apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80
                 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   - apt-get update
@@ -62,11 +62,21 @@ ubuntu:
   - useradd ogurchik -g batareika
   - docker exec turnichok /bin/bash -c "useradd -m ogurchik -u $(getent passwd ogurchik | cut -d':' -f3) -g batareika"
 
+  # add test user fonarik
+  - useradd fonarik -g batareika
+
   # set users containers
   - echo "molotok balalaika" >> /etc/security/docker.conf
   - echo "@dubina zabor" >> /etc/security/docker.conf
   - echo "vodka turnichok" >> /etc/security/docker.conf
   - echo "ogurchik turnichok" >> /etc/security/docker.conf
+
+  # set users passwd
+  - echo -e "qwerty\nqwerty" | passwd molotok
+  - echo -e "qwerty\nqwerty" | passwd zubilo
+  - echo -e "qwerty\nqwerty" | passwd vodka
+  - echo -e "qwerty\nqwerty" | passwd ogurchik
+  - echo -e "qwerty\nqwerty" | passwd fonarik
 
   - kill $(cat /var/run/docker.pid) && COUNTER=0 &&
       (while [ -f /var/run/docker.pid ]; do
@@ -86,11 +96,9 @@ centos:
     /lib64/security/pam_docker.so: build/pam_docker.so
 
 test:
-- echo "TEST BEGIN"
 - (docker daemon &) && (while ! [ -f /var/run/docker.pid ]; do sleep 1 ; done)
-- docker ps
+- mkdir /var/run/sshd && (/usr/sbin/sshd &)
 - bats test/
-- echo "TEST END"
 
 test_env:
   DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
