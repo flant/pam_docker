@@ -7,6 +7,15 @@ before_build:
 - make
 - DESTDIR=build make install
 
+ubuntu/12.04:
+  before_test:
+  - echo "deb https://apt.dockerproject.org/repo ubuntu-precise main" > /etc/apt/sources.list.d/docker.list
+  - apt-get install -y sudo
+
+ubuntu/14.04:
+  before_test:
+  - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
+
 ubuntu:
   prepare:
   - apt-get install -y libpam0g-dev
@@ -16,16 +25,32 @@ ubuntu:
   fpm_script:
   - when: [after_install, after_upgrade, after_remove]
     do: echo "Updating pam auth ..." && pam-auth-update --package && echo "Updating pam auth OK"
-
   before_test:
-  - git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
-  - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >
-      /etc/apt/sources.list.d/docker.list
   - apt-get install -y apt-transport-https ca-certificates lxc iptables ssh sshpass
   - apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80
                 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   - apt-get update
   - apt-get install -y docker-engine=$DOCKER_VERSION
+
+centos:
+  prepare:
+  - yum install -y pam-devel
+  fpm_files:
+    /lib64/security/pam_docker.so: build/pam_docker.so
+  before_test:
+  - echo -e "[dockerrepo]\nname=Docker Repository\nbaseurl=https://yum.dockerproject.org/repo/main/centos/\$releasever/\nenabled=1\ngpgcheck=1\ngpgkey=https://yum.dockerproject.org/gpg" > /etc/yum.repos.d/docker.repo
+  - yum install -y sudo openssh-server openssh-clients "docker-engine-$DOCKER_VERSION"
+  - echo "session     required      pam_docker.so" >> /etc/pam.d/system-auth
+  - curl -o /tmp/epel.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  - rpm -ivh /tmp/epel.rpm
+  - yum --enablerepo=epel -y install sshpass
+
+'*':
+  before_test:
+  - /usr/bin/ssh-keygen -A
+  - mkdir /var/run/sshd
+
+  - git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
   - CGROUP=/sys/fs/cgroup SECURITYFS=/sys/kernel/security &&
     (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
     (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS)
@@ -72,32 +97,34 @@ ubuntu:
   - echo "ogurchik turnichok" >> /etc/security/docker.conf
 
   # set users passwd
-  - echo -e "qwerty\nqwerty" | passwd molotok
-  - echo -e "qwerty\nqwerty" | passwd zubilo
-  - echo -e "qwerty\nqwerty" | passwd vodka
-  - echo -e "qwerty\nqwerty" | passwd ogurchik
-  - echo -e "qwerty\nqwerty" | passwd fonarik
+  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd molotok
+  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd zubilo
+  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd vodka
+  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd ogurchik
+  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd fonarik
 
   - kill $(cat /var/run/docker.pid) && COUNTER=0 &&
-      (while [ -f /var/run/docker.pid ]; do
+       (while [ -f /var/run/docker.pid ]; do
+          if [ $COUNTER -ge 20 ] ; then
+            kill -9 $(cat /var/run/docker.pid) ;
+            rm /var/run/docker.pid ;
+            break ;
+          fi ;
+          sleep 1 ;
+          let COUNTER=COUNTER+1 ;
+        done)
+
+test:
+- (docker daemon &) && COUNTER=0 &&
+     (while ! [ -f /var/run/docker.pid ]; do
         if [ $COUNTER -ge 20 ] ; then
-          kill -9 $(cat /var/run/docker.pid) ;
-          rm /var/run/docker.pid ;
-          break ;
+          echo "Unable to start docker daemon" 1>&2 ;
+          exit 1 ;
         fi ;
         sleep 1 ;
         let COUNTER=COUNTER+1 ;
       done)
-
-centos:
-  prepare:
-  - yum install -y pam-devel
-  fpm_files:
-    /lib64/security/pam_docker.so: build/pam_docker.so
-
-test:
-- (docker daemon &) && (while ! [ -f /var/run/docker.pid ]; do sleep 1 ; done)
-- mkdir /var/run/sshd && (/usr/sbin/sshd &)
+- (/usr/sbin/sshd &)
 - bats test/
 
 test_env:

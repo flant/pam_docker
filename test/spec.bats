@@ -38,7 +38,7 @@ test_sudo() {
 }
 
 test_ssh() {
-  sshpass -p qwerty ssh -o "StrictHostKeyChecking no" $1@localhost "$2"
+  sshpass -p bbfa1c5c-3ae6-4783-a0dc-2118190c62ed ssh -o "StrictHostKeyChecking no" $1@localhost "$2"
 }
 
 test_cmd() {
