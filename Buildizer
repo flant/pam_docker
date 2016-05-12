@@ -38,11 +38,10 @@ centos:
   fpm_files:
     /lib64/security/pam_docker.so: build/pam_docker.so
   before_test:
-  - echo -e "[dockerrepo]\nname=Docker Repository\nbaseurl=https://yum.dockerproject.org/repo/main/centos/\$releasever/\nenabled=1\ngpgcheck=1\ngpgkey=https://yum.dockerproject.org/gpg" > /etc/yum.repos.d/docker.repo
-  - yum install -y sudo openssh-server openssh-clients "docker-engine-$DOCKER_VERSION"
   - echo "session     required      pam_docker.so" >> /etc/pam.d/system-auth
-  - curl -o /tmp/epel.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  - rpm -ivh /tmp/epel.rpm
+  - echo -e "[dockerrepo]\nname=Docker Repository\nbaseurl=https://yum.dockerproject.org/repo/main/centos/\$releasever/\nenabled=1\ngpgcheck=1\ngpgkey=https://yum.dockerproject.org/gpg" > /etc/yum.repos.d/docker.repo
+  - yum install -y sudo openssh-server openssh-clients docker-engine-$DOCKER_VERSION
+  - curl -o /tmp/epel.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && rpm -ivh /tmp/epel.rpm
   - yum --enablerepo=epel -y install sshpass
 
 '*':
@@ -55,64 +54,6 @@ centos:
     (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
     (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS)
   - rm -rf /var/lib/docker/*
-  - (docker daemon &) && (while ! [ -f /var/run/docker.pid ]; do sleep 1 ; done)
-
-  # run test containers
-  - docker run -d --restart=always --name=turnichok $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
-  - docker run -d --restart=always --name=zabor $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
-  - docker run -d --restart=always --name=balalaika $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
-
-  # add test group dubina
-  - groupadd dubina
-  - docker exec zabor /bin/bash -c "groupadd dubina -g $(getent group dubina | cut -d':' -f3)"
-  - docker exec balalaika /bin/bash -c "groupadd dubina -g $(getent group dubina | cut -d':' -f3)"
-  # add test group batareika
-  - groupadd batareika
-  - docker exec turnichok /bin/bash -c "groupadd batareika -g $(getent group batareika | cut -d':' -f3)"
-
-  # add test user zubilo
-  - useradd zubilo -g dubina
-  - docker exec zabor /bin/bash -c "useradd -m zubilo -u $(getent passwd zubilo | cut -d':' -f3) -g dubina"
-
-  # add test user molotok
-  - useradd molotok -g dubina
-  - docker exec zabor /bin/bash -c "useradd -m molotok -u $(getent passwd molotok | cut -d':' -f3) -g dubina"
-  - docker exec balalaika /bin/bash -c "useradd -m molotok -u $(getent passwd molotok | cut -d':' -f3) -g dubina"
-
-  # add test user vodka
-  - useradd vodka -g batareika
-  - docker exec turnichok /bin/bash -c "useradd -m vodka -u $(getent passwd vodka | cut -d':' -f3) -g batareika"
-
-  # add test user ogurchik
-  - useradd ogurchik -g batareika
-  - docker exec turnichok /bin/bash -c "useradd -m ogurchik -u $(getent passwd ogurchik | cut -d':' -f3) -g batareika"
-
-  # add test user fonarik
-  - useradd fonarik -g batareika
-
-  # set users containers
-  - echo "molotok balalaika" >> /etc/security/docker.conf
-  - echo "@dubina zabor" >> /etc/security/docker.conf
-  - echo "vodka turnichok" >> /etc/security/docker.conf
-  - echo "ogurchik turnichok" >> /etc/security/docker.conf
-
-  # set users passwd
-  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd molotok
-  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd zubilo
-  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd vodka
-  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd ogurchik
-  - echo -e "bbfa1c5c-3ae6-4783-a0dc-2118190c62ed\nbbfa1c5c-3ae6-4783-a0dc-2118190c62ed" | passwd fonarik
-
-  - kill $(cat /var/run/docker.pid) && COUNTER=0 &&
-       (while [ -f /var/run/docker.pid ]; do
-          if [ $COUNTER -ge 20 ] ; then
-            kill -9 $(cat /var/run/docker.pid) ;
-            rm /var/run/docker.pid ;
-            break ;
-          fi ;
-          sleep 1 ;
-          let COUNTER=COUNTER+1 ;
-        done)
 
 test:
 - (docker daemon &) && COUNTER=0 &&
