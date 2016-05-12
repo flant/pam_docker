@@ -30,21 +30,21 @@ teardown() {
 }
 
 test_su() {
-  su $1 -c "$2"
+  su $1 -c '$2'
 }
 
 test_sudo() {
-  sudo -u $1 bash -c "$2"
+  sudo -u $1 bash -c '$2'
 }
 
 test_ssh() {
-  sshpass -p bbfa1c5c-3ae6-4783-a0dc-2118190c62ed ssh -o "StrictHostKeyChecking no" $1@localhost "$2"
+  sshpass -p bbfa1c5c-3ae6-4783-a0dc-2118190c62ed ssh -o 'StrictHostKeyChecking no' $1@localhost '$2'
 }
 
 test_cmd() {
-  test_su $1 "$2"
-  test_sudo $1 "$2"
-  test_ssh $1 "$2"
+  test_su $1 '$2'
+  test_sudo $1 '$2'
+  test_ssh $1 '$2'
 }
 
 @test "mount and process isolation" {
@@ -53,7 +53,7 @@ test_cmd() {
 
   for user in ${JAILED_USERS[@]}
   do
-    test_cmd $user '[ -z $(mount | grep testdir2) ]'
-    test_cmd $user '[ -z $(ps -A | grep testprocess) ]'
+    test_cmd $user '[ -z "$(mount | grep testdir2)" ]'
+    test_cmd $user '[ -z "$(ps -A | grep testprocess)" ]'
   done
 }
