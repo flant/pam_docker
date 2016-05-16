@@ -56,7 +56,7 @@ centos:
   - rm -rf /var/lib/docker/*
 
 test:
-- (docker daemon &) && COUNTER=0 &&
+- (docker daemon 2>&1 > /dev/null &) && COUNTER=0 &&
      (while ! [ -f /var/run/docker.pid ]; do
         if [ $COUNTER -ge 20 ] ; then
           echo "Unable to start docker daemon" 1>&2 ;
@@ -65,7 +65,7 @@ test:
         sleep 1 ;
         let COUNTER=COUNTER+1 ;
       done)
-- (/usr/sbin/sshd &)
+- (/usr/sbin/sshd 2>&1 > /dev/null &)
 - bats test/*.spec
 
 test_env:
