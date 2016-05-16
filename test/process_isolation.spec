@@ -1,6 +1,14 @@
 setup() {
   load common
   load fixture
+
+  bash -c 'echo $$ > /var/run/testprocess.pid ; \
+           echo -n testprocess > /proc/self/comm ; \
+           while true ; do sleep 1 ; date ; done' &
+}
+
+teardown() {
+  kill $(cat /var/run/testprocess.pid)
 }
 
 @test "process isolation" {

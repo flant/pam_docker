@@ -66,7 +66,7 @@ test:
         let COUNTER=COUNTER+1 ;
       done)
 - (/usr/sbin/sshd &)
-- bats test/
+- bats test/*.spec
 
 test_env:
   DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
