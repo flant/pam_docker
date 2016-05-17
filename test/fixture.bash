@@ -8,7 +8,8 @@ up_container() {
     if [ "$(docker ps -a | grep $name)" != "" ] ; then
       docker rm $name
     fi
-    docker run -d --restart=always --name=$name $DOCKER_TEST_IMAGE /bin/bash -c "while true; do date; sleep 1; done"
+    docker run -d --restart=always --name=$name $DOCKER_TEST_IMAGE /bin/bash -c \
+      "echo $name > /docker_container_name ; while true; do date; sleep 1; done"
   fi
 }
 
