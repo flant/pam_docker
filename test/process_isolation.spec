@@ -4,7 +4,7 @@ setup() {
 
   bash -c 'echo $$ > /var/run/testprocess.pid ; \
            echo -n testprocess > /proc/self/comm ; \
-           while true ; do sleep 1 ; date ; done' &
+           while true ; do sleep 1 ; done' > /dev/null 2>&1 &
 }
 
 teardown() {
