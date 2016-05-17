@@ -1,5 +1,5 @@
-export JAILED_USERS=(user1 user2 user3 user4)
-export PASSWORD="bbfa1c5c-3ae6-4783-a0dc-2118190c62ed"
+JAILED_USERS=( user1 user2 user3 user4 )
+PASSWORD="bbfa1c5c-3ae6-4783-a0dc-2118190c62ed"
 
 up_container() {
   name=$1

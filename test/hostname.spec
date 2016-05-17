@@ -1,3 +1,0 @@
-@test "hostname" {
-  TODO
-}

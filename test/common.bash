@@ -11,7 +11,15 @@ test_ssh() {
 }
 
 test_cmd() {
-  test_su $1 "$2"
-  test_sudo $1 "$2"
-  test_ssh $1 "$2"
+  test_func=$3
+
+  if [ -z "$test_func" ] ; then
+    test_su $1 "$2"
+    test_sudo $1 "$2"
+    test_ssh $1 "$2"
+  else
+    eval $test_func $(test_su $1 "$2")
+    eval $test_func $(test_sudo $1 "$2")
+    eval $test_func $(test_ssh $1 "$2")
+  fi
 }
