@@ -1,25 +1,39 @@
-test_su() {
+run_su() {
   su $1 -c "$2"
 }
 
-test_sudo() {
+run_sudo() {
   sudo -u $1 bash -c "$2"
 }
 
-test_ssh() {
+run_ssh() {
   sshpass -p $PASSWORD ssh -o 'StrictHostKeyChecking no' $1@localhost "$2"
 }
 
-test_cmd() {
-  test_func=$3
-
+test_run() {
   if [ -z "$test_func" ] ; then
-    test_su $1 "$2"
-    test_sudo $1 "$2"
-    test_ssh $1 "$2"
+    eval $run_func $run_func_args
+  elif [ -z "$background" ] ; then
+    eval $test_func $(eval $run_func $run_func_args) $test_func_args
   else
-    eval $test_func $(test_su $1 "$2")
-    eval $test_func $(test_sudo $1 "$2")
-    eval $test_func $(test_ssh $1 "$2")
+    eval $run_func $run_func_args
+    eval $test_func $test_func_args
   fi
+}
+
+test_cmd() {
+  user=$1
+  cmd=$2
+  if [ "$3" != "" ] ; then
+    test_func=$3
+    shift 3
+    test_func_args=$@
+  fi
+
+  for run_func in run_su run_sudo run_ssh ; do
+    background=$background \
+      run_func=$run_func run_func_args="$user '$cmd'" \
+        test_func=$test_func test_func_args=$test_func_args \
+          test_run
+  done
 }
