@@ -57,7 +57,7 @@ centos:
 
 test:
 - (docker daemon > /dev/null 2>&1 &) && COUNTER=0 &&
-     (while ! [ -f /var/run/docker.pid ]; do
+     (while ! [ -f /var/run/docker.pid ] ; do
         if [ $COUNTER -ge 20 ] ; then
           echo "Unable to start docker daemon" 1>&2 ;
           exit 1 ;

@@ -8,8 +8,13 @@ up_container() {
     if [ "$(docker ps -a | grep $name)" != "" ] ; then
       docker rm $name
     fi
-    docker run -d --restart=always --name=$name $DOCKER_TEST_IMAGE /bin/bash -c \
-      "echo $name > /docker_container_name ; while true; do date; sleep 1; done"
+    mkdir -p -m 0777 /var/run/shared_dir/
+    docker run -d \
+      --volume /var/run/shared_dir:/var/run/shared_dir \
+      --restart=always --name=$name $DOCKER_TEST_IMAGE /bin/bash -c \
+      "echo -n $name > /proc/\$\$/comm && \
+       echo $name > /docker_container_name && \
+       while true; do date; sleep 1; done"
   fi
 }
 
@@ -70,9 +75,9 @@ set_user_password() {
 }
 
 setup_test_mount() {
-  mkdir -p /tmp/testdir1 /tmp/testdir2
-  ( [ -z "$(mount | grep testdir)" ] &&
-    mount --bind /tmp/testdir1 /tmp/testdir2
+  mkdir -p /tmp/mount_test_dir1 /tmp/mount_test_dir2
+  ( [ -z "$(mount | grep mount_test_dir)" ] &&
+    mount --bind /tmp/mount_test_dir1 /tmp/mount_test_dir2
   ) || true
 }
 

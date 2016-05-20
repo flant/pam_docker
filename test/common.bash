@@ -7,7 +7,7 @@ run_sudo() {
 }
 
 run_ssh() {
-  sshpass -p $PASSWORD ssh -o 'StrictHostKeyChecking no' $1@localhost "$2"
+  sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $1@localhost "$2"
 }
 
 test_run() {
@@ -16,7 +16,7 @@ test_run() {
   elif [ -z "$background" ] ; then
     eval $test_func $(eval $run_func $run_func_args) $test_func_args
   else
-    eval $run_func $run_func_args
+    eval $run_func $run_func_args &
     eval $test_func $test_func_args
   fi
 }
