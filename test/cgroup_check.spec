@@ -33,14 +33,14 @@ check_container_process_cgroup() {
 
 @test "cgroup check" {
   background=yes \
-    test_cmd user5 \
-      'echo -n tnt > /proc/$$/comm ; echo $$ > /var/run/shared_dir/tnt ; while true ; do sleep 1 ; done 1>&- 2>&- <&-' \
-        check_non_container_process_cgroup tnt user5
+    test_cmd user5 "$TEST_BACKGROUND_PROCESS" \
+             check_non_container_process_cgroup \
+             $TEST_BACKGROUND_PROCESS_NAME user5
 
   for user in ${JAILED_USERS[@]} ; do
     background=yes \
-      test_cmd $user \
-        'echo -n tnt > /proc/$$/comm ; echo $$ > /var/run/shared_dir/tnt ; while true ; do sleep 1 ; done 1>&- 2>&- <&-' \
-          check_container_process_cgroup tnt $user
+      test_cmd $user "$TEST_BACKGROUND_PROCESS" \
+               check_container_process_cgroup \
+               $TEST_BACKGROUND_PROCESS_NAME $user
   done
 }
