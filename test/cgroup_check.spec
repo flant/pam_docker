@@ -14,6 +14,7 @@ do_check_process_cgroup() {
 
   background_process_kill $process_name
 
+  echo "$cgroup_entries_list"
   [ -z "$(echo "$cgroup_entries_list" | grep -v '^2')" ]
 }
 
