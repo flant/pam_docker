@@ -37,3 +37,13 @@ test_cmd() {
           test_run
   done
 }
+
+user_container_name() {
+  user=$1
+  su $user -c 'cat /docker_container_name'
+}
+
+user_container_pid() {
+  user=$1
+  ps -A | grep $(user_container_name $user) | sed -r 's/^\s+//' | cut -d' ' -f1
+}
