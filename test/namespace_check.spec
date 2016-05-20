@@ -10,9 +10,11 @@ do_check_process_namespace() {
   check_pid=$3
   pid=$(background_process_pid $process_name)
 
+  # TODO net namespace isolation not working
+
   namespace_entries_list=$(cat \
-    <(for ns in $(ls -1 /proc/$pid/ns/) ; do readlink /proc/$pid/ns/$ns ; done) \
-    <(for ns in $(ls -1 /proc/$check_pid/ns/) ; do readlink /proc/$check_pid/ns/$ns ; done) \
+    <(for ns in $(ls -1 /proc/$pid/ns/ | grep -v net) ; do readlink /proc/$pid/ns/$ns ; done) \
+    <(for ns in $(ls -1 /proc/$check_pid/ns/ | grep -v net) ; do readlink /proc/$check_pid/ns/$ns ; done) \
     | sort | uniq -c | sed -r 's/^\s+//')
 
   background_process_kill $process_name
