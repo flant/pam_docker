@@ -18,7 +18,7 @@ All you need in Ubuntu / Debian or CentOS is to add a repository and install the
 ## 1. Ubuntu & Debian
 ```
 curl -s https://packagecloud.io/install/repositories/flant/pam_docker/script.deb.sh | sudo bash
-sudo apt-get install pam_docker
+sudo apt-get install pam-docker
 ```
 
 ## 2. CentOS
