@@ -11,9 +11,11 @@ gpasswd -a vagrant docker
 service docker restart
 
 cd /vagrant
+apt-get install -y build-essential libpam0g-dev
 make clean
 make
-make install-ubuntu
+DESTDIR=/lib/security/ make install
+make pam-auth-update
 
 docker run -d --name=container1 ubuntu:14.04 /bin/bash -c 'while true; do date; sleep 1; done'
 docker run -d --name=container2 ubuntu:14.04 /bin/bash -c 'while true; do date; sleep 1; done'
