@@ -300,7 +300,7 @@ error:
 static int add_to_namespaces(pam_handle_t *pamh, pid_t namespace_target_pid) {
     int ret = 0;
     char pathbuf[PATH_MAX];
-    char *ns[] = {"ipc", "uts", "pid", "mnt"};
+    char *ns[] = {"net", "ipc", "uts", "pid", "mnt"};
     size_t n = sizeof(ns)/sizeof(*ns);
     int ns_fd[n];
     size_t i;
