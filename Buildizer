@@ -56,15 +56,16 @@ centos:
   - curl -o /tmp/epel.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && rpm -ivh /tmp/epel.rpm
   - yum --enablerepo=epel -y install sshpass
 
-before_test:
-- /usr/bin/ssh-keygen -A
-- mkdir /var/run/sshd
+'*':
+  before_test:
+  - /usr/bin/ssh-keygen -A
+  - mkdir /var/run/sshd
 
-- git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
-- CGROUP=/sys/fs/cgroup SECURITYFS=/sys/kernel/security &&
-  (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
-  (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS)
-- rm -rf /var/lib/docker/*
+  - git clone https://github.com/sstephenson/bats.git /tmp/bats && /tmp/bats/install.sh /usr/local
+  - CGROUP=/sys/fs/cgroup SECURITYFS=/sys/kernel/security &&
+    (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
+    (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS)
+  - rm -rf /var/lib/docker/*
 
 test_env:
   DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
