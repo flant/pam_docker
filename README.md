@@ -37,6 +37,10 @@ Please edit your */etc/pam.d/system-auth* by adding to its end (just after the `
 ```
 session    required    pam_docker.so
 ```
+Because the sshd in centos 7 not using system-auth, please edit */etc/pam.d/sshd* by adding
+```
+session     include     system-auth
+```
 
 ## 2. Add system user
 System user and all of user's groups should be added **both to host and container**. UIDs and GIDs should be the same (at the host and the container).
