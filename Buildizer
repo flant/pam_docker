@@ -1,7 +1,7 @@
 build_type: fpm
 
 package_name: pam_docker
-package_version: 0.1.0-3
+package_version: 0.1.0-4
 
 before_build:
 - make
