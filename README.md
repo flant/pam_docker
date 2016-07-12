@@ -24,7 +24,7 @@ sudo apt-get install pam-docker
 ## 2. CentOS
 ```
 curl -s https://packagecloud.io/install/repositories/flant/pam_docker/script.deb.sh | sudo bash
-sudo yum install pam-docker
+sudo yum install pam_docker
 ```
 
 # Configuration
