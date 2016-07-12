@@ -31,6 +31,18 @@ ubuntu:
                 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   - apt-get update
   - apt-get install -y docker-engine=$DOCKER_VERSION
+  test:
+  - (docker daemon > /dev/null 2>&1 &) && COUNTER=0 &&
+       (while ! [ -f /var/run/docker.pid ] ; do
+          if [ $COUNTER -ge 20 ] ; then
+            echo "Unable to start docker daemon" 1>&2 ;
+            exit 1 ;
+          fi ;
+          sleep 1 ;
+          let COUNTER=COUNTER+1 ;
+        done)
+  - (/usr/sbin/sshd > /dev/null 2>&1 &)
+  - bats test/*.spec
 
 centos:
   prepare:
@@ -53,19 +65,6 @@ before_test:
   (mountpoint -q $CGROUP || mount -n -t tmpfs -o uid=0,gid=0,mode=0755 cgroup $CGROUP) &&
   (mountpoint -q $SECURITYFS || mount -t securityfs none $SECURITYFS)
 - rm -rf /var/lib/docker/*
-
-test:
-- (docker daemon > /dev/null 2>&1 &) && COUNTER=0 &&
-     (while ! [ -f /var/run/docker.pid ] ; do
-        if [ $COUNTER -ge 20 ] ; then
-          echo "Unable to start docker daemon" 1>&2 ;
-          exit 1 ;
-        fi ;
-        sleep 1 ;
-        let COUNTER=COUNTER+1 ;
-      done)
-- (/usr/sbin/sshd > /dev/null 2>&1 &)
-- bats test/*.spec
 
 test_env:
   DOCKER_VERSION: ["1.9.*", "1.10.*", "1.11.*"]
