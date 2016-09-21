@@ -17,7 +17,7 @@ install:
 - BUNDLE_GEMFILE=~/buildizer/Gemfile bundle install
 script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer build && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer test
 sudo: required
-before_script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer prepare
+before_script: env && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer prepare
 env:
 - BUILDIZER_TARGET=ubuntu/14.04
 - BUILDIZER_TARGET=ubuntu/12.04
