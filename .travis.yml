@@ -12,7 +12,7 @@ install:
 - sudo apt-get -o dpkg::options::="--force-confnew" install -y --force-yes docker-engine=1.9.1-0~trusty
 - echo "docker-engine hold" | sudo dpkg --set-selections
 - git clone https://github.com/flant/buildizer ~/buildizer
-- echo 'export BUNDLE_GEMFILE=~/buildizer/Gemfile' | tee -a ~/.bashrc
+- echo "export BUNDLE_GEMFILE=~/buildizer/Gemfile" | tee -a ~/.bashrc
 - export BUNDLE_GEMFILE=~/buildizer/Gemfile
 - gem install bundler
 - gem install overcommit
@@ -21,7 +21,7 @@ script: buildizer build && buildizer test
 sudo: required
 before_script: buildizer prepare
 env:
-- BUNDLE_GEMFILE=~/buildizer/Gemfile BUILDIZER_TARGET=ubuntu/14.04
-- BUNDLE_GEMFILE=~/buildizer/Gemfile BUILDIZER_TARGET=ubuntu/12.04
-- BUNDLE_GEMFILE=~/buildizer/Gemfile BUILDIZER_TARGET=centos/centos7
+- BUILDIZER_TARGET=ubuntu/14.04
+- BUILDIZER_TARGET=ubuntu/12.04
+- BUILDIZER_TARGET=centos/centos7
 after_success: buildizer deploy
