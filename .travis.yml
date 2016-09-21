@@ -14,7 +14,7 @@ install:
 - git clone https://github.com/flant/buildizer ~/buildizer
 - gem install bundler
 - gem install overcommit
-- bundle install
+- BUNDLE_GEMFILE=~/buildizer/Gemfile bundle install
 script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer build && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer test
 sudo: required
 before_script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer prepare
