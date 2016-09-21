@@ -1,5 +1,6 @@
 ---
 dist: trusty
+sudo: required
 cache: apt
 language: ruby
 rvm: 2.2.1
@@ -17,9 +18,8 @@ install:
 - gem install bundler
 - gem install overcommit
 - bundle install
-script: bundle exec buildizer build && bundle exec buildizer test
-sudo: required
 before_script: bundle exec buildizer prepare
+script: bundle exec buildizer build && bundle exec buildizer test
 env:
 - BUILDIZER_TARGET=ubuntu/14.04
 - BUILDIZER_TARGET=ubuntu/12.04
