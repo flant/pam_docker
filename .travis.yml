@@ -12,7 +12,7 @@ install:
 - sudo apt-get -o dpkg::options::="--force-confnew" install -y --force-yes docker-engine=1.9.1-0~trusty
 - echo "docker-engine hold" | sudo dpkg --set-selections
 - git clone https://github.com/flant/buildizer ~/buildizer
-- gem install bundler
+- gem install bundler=1.12.1
 - gem install overcommit
 - BUNDLE_GEMFILE=~/buildizer/Gemfile bundle install
 script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer build && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer test
