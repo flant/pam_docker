@@ -17,11 +17,11 @@ install:
 - gem install bundler
 - gem install overcommit
 - bundle install
-script: buildizer build && buildizer test
+script: bundle exec buildizer build && bundle exec buildizer test
 sudo: required
-before_script: buildizer prepare
+before_script: bundle exec buildizer prepare
 env:
 - BUILDIZER_TARGET=ubuntu/14.04
 - BUILDIZER_TARGET=ubuntu/12.04
 - BUILDIZER_TARGET=centos/centos7
-after_success: buildizer deploy
+after_success: bundle exec buildizer deploy
