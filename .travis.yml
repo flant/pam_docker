@@ -15,9 +15,11 @@ install:
 - gem install bundler -v 1.12.1
 - gem install overcommit
 - BUNDLE_GEMFILE=~/buildizer/Gemfile bundle install
+- BUNDLE_GEMFILE=~/buildizer/Gemfile bundle show buildizer
+- BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer
 script: BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer build && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer test
 sudo: required
-before_script: BUNDLE_GEMFILE=~/buildizer/Gemfile gem env && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer prepare
+before_script:BUNDLE_GEMFILE=~/buildizer/Gemfile gem env && BUNDLE_GEMFILE=~/buildizer/Gemfile buildizer prepare
 env:
 - BUILDIZER_TARGET=ubuntu/14.04
 - BUILDIZER_TARGET=ubuntu/12.04
