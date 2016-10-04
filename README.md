@@ -37,13 +37,13 @@ Please edit your */etc/pam.d/system-auth* by adding to its end (just after the `
 ```
 session    required    pam_docker.so
 ```
-#### Enable sudo
-Because the sudo in centos 7 not using system-auth, please edit */etc/pam.d/sudo* by adding
+#### Enable for sudo
+Add this line to the end of */etc/pam.d/sudo* (sudo in CentOS 7 doesn't use system-auth by default):
 ```
 session     include     system-auth
 ```
-#### Enable ssh
-Because the sshd in centos 7 not using system-auth, please edit */etc/pam.d/sshd* by adding
+#### Enable for ssh
+Add this line to the end of */etc/pam.d/sshd* (ssh in CentOS 7 doesn't use system-auth by default):
 ```
 session     include     system-auth
 ```
