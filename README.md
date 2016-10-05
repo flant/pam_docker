@@ -1,5 +1,7 @@
 # Description
-pam_docker is a module for putting host's users inside Docker containers via PAM. It is an easy way of providing SSH access to containers' users and simplifying a lot of other things.
+pam_docker is an experimental module for putting host's users inside Docker containers via PAM. It is an easy way of providing SSH access to containers' users and simplifying a lot of other things.
+
+WARNING: pam_docker was mostly created for academic purposes, to get a better understanding how Docker actually works.
 
 Here you can find a brief documentation for its features and limitations as well as instructions on how to use it, install it (we have packages for Ubuntu/Debian & CentOS), build it from sources or try with minimal efforts (using Vagrant image). Enjoy!
 
